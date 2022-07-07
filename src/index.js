@@ -1,7 +1,8 @@
-const  express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import cors from 'cors';
+import { PORT } from './config';
 
 const app = express();
 app.use(cors);
@@ -47,4 +48,4 @@ io.on('connection', (socket) => {
     })
 })
 
-server.listen(3001, () => console.log('server on'))
+server.listen(PORT, () => console.log('server on', PORT))
