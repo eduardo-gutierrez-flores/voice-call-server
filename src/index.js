@@ -8,6 +8,7 @@ const app = express();
 app.use(cors);
 const server = createServer(app);
 const usersInCalls = [];
+const usersActive = [];
 
 const io = new Server(server, {
     cors: {
@@ -20,7 +21,8 @@ io.on('connection', (socket) => {
     console.log(`conectado: ${socket.id}`)
 
     socket.on('create_user', (data) => {
-        socket.broadcast.emit('new_active', {name: data.name, id: socket.id})
+        usersActive.push({name: data.name, id: socket.id});
+        io.emit('new_active', usersActive)
         // socket.join(socket.id)
     })
     
@@ -39,6 +41,11 @@ io.on('connection', (socket) => {
         // socket.join(socket.id)
     })
     
+    socket.on('cancel_call', (data) => {
+        socket.to(data.id).emit('leave', {name: data.name, id: data.id, token: data.token})
+        // socket.join(socket.id)
+    })
+    
     socket.on('answer_call', (data) => {
         console.log(data);
         socket.join(data.room)
@@ -46,6 +53,14 @@ io.on('connection', (socket) => {
         io.emit('users_in_call', usersInCalls)
         // socket.join(socket.id)
     })
+    
+    socket.on('disconnect', (data) => {
+        console.log(socket.id, 'disconnected');
+        const user = usersActive.find((user) => user.id === socket.id);
+        const index = usersActive.indexOf(user);
+        usersActive.splice(index, 1);
+        io.emit('new_active', usersActive)
+    }) 
 })
 
 server.listen(PORT, () => console.log('server on', PORT))
