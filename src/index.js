@@ -47,6 +47,7 @@ io.on('connection', (socket) => {
     
     socket.on('cancel_call', (data) => {
         socket.to(data.id).emit('leave', {username: data.username, id: data.id, token: data.token})
+        socket.leave(data.room)
     })
     
     socket.on('answer_call', (data) => {
